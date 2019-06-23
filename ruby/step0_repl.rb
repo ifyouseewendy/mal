@@ -1,4 +1,4 @@
-require_relative "./readline"
+require_relative "./boot"
 
 def READ(arg, *_)
   arg
