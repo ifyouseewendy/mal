@@ -9,8 +9,7 @@ class Printer
       content = mal_v.value.map { |v| pr_str v }.join(" ")
       "(" + content + ")"
     else
-      mal_v.to_s
-      # raise "Don't know how to handle #{mal_v.inspect}"
+      raise "Don't know how to handle #{mal_v.inspect}"
     end
   end
 end

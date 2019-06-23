@@ -15,9 +15,9 @@ class Reader
 
   class << self
     def read_str(str)
-      logger.info("--> start str: #{str.inspect}")
+      # logger.info("--> start str: #{str.inspect}")
       new(tokenize(str)).read_form
-      logger.info("--> end")
+      # logger.info("--> end")
     end
 
     def logger

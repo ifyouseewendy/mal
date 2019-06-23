@@ -47,7 +47,7 @@ all help:
 # Command line settings
 #
 
-MAL_IMPL = js
+MAL_IMPL = ruby
 
 # cbm or qbasic
 basic_MODE = cbm

@@ -1,0 +1,8 @@
+#!/opt/rubies/2.6.3/bin/ruby
+
+require "pry"
+require_relative "../ruby/boot"
+
+binding.pry
+
+puts "done"

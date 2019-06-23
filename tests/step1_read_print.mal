@@ -16,8 +16,6 @@ abc
 ;=>abc
    abc   
 ;=>abc
-abc5
-;=>abc5
 abc-def
 ;=>abc-def
 
