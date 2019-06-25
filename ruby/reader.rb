@@ -21,8 +21,6 @@ class Reader
       end
     end
 
-  private
-
     def tokenize(str)
       tokens = []
       p = 0
@@ -70,16 +68,15 @@ private
   end
 
   def read_list
-    _next # ignore "("
-
     res = []
     loop do
+      _next
       t = _peek
+
       raise "EOF encountered" if t.nil?
       break if t == ")"
 
       res << read_form
-      _next
     end
 
     MalList.new(res)
@@ -87,12 +84,18 @@ private
 
   def read_atom
     t = _peek
-    if t =~ /^[\-]?\d+$/
+    case t
+    when "nil"
+      MalNil.new(t)
+    when "true", "false"
+      MalBool.new(t)
+    when /^[\-]?\d+$/
       MalNum.new(t.to_i)
-    # elsif t =~ /^"\w*"/
-    elsif t =~ /^[-|>|\w]+$/
+    when /^".*"$/
+      MalString.new(t.gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'}))
+    when /^[-|>|\w]+$/
       MalSymbol.new(t)
-    elsif t =~ /^[\+\-\*\/]+$/
+    when /^[\+\-\*\/]+$/
       MalSymbol.new(t)
     else
       MAL_LOGGER.error("#read_atom: Don't know how to handle token: #{t.inspect}")
