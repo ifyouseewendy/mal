@@ -17,5 +17,13 @@ def rep(arg)
 end
 
 while buf = Readline.readline("user> ", true)
-  puts rep(buf)
+  begin
+    MAL_LOGGER.info("--> start str: #{buf.inspect}")
+    puts rep(buf)
+  rescue => e
+    MAL_LOGGER.error "e: #{e.inspect}"
+    puts "Error: #{e}"
+  ensure
+    MAL_LOGGER.info("--> end\n")
+  end
 end

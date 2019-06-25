@@ -15,10 +15,7 @@ class Reader
 
   class << self
     def read_str(str)
-      MAL_LOGGER.info("--> start str: #{str.inspect}")
-      new(tokenize(str)).read_form.tap do |_|
-        MAL_LOGGER.info("--> end\n")
-      end
+      new(tokenize(str)).read_form
     end
 
     def tokenize(str)
@@ -49,7 +46,7 @@ class Reader
 
   def read_form
     case _peek
-    when "("
+    when "(", "["
       read_list
     else
       read_atom
@@ -63,7 +60,7 @@ private
   end
 
   def _peek
-    raise "Position exceeds tokens length" if position == tokens.length
+    raise "EOF encountered" if position == tokens.length
     tokens[position]
   end
 
@@ -73,8 +70,7 @@ private
       _next
       t = _peek
 
-      raise "EOF encountered" if t.nil?
-      break if t == ")"
+      break if t == ")" || t == "]"
 
       res << read_form
     end
@@ -92,7 +88,11 @@ private
     when /^[\-]?\d+$/
       MalNum.new(t.to_i)
     when /^".*"$/
-      MalString.new(t.gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'}))
+      # v = t.gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'})
+      # MAL_LOGGER.info "v: #{v.inspect}"
+      MalString.new(t)
+    when /^".*$/
+      raise "unbalanced quotes"
     when /^[-|>|\w]+$/
       MalSymbol.new(t)
     when /^[\+\-\*\/]+$/
