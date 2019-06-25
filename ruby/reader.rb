@@ -1,4 +1,4 @@
-require "logger"
+require_relative "./mal_logger"
 require_relative "./types"
 
 class Reader
@@ -15,13 +15,10 @@ class Reader
 
   class << self
     def read_str(str)
-      # logger.info("--> start str: #{str.inspect}")
-      new(tokenize(str)).read_form
-      # logger.info("--> end")
-    end
-
-    def logger
-      @logger ||= Logger.new("./info.log")
+      MAL_LOGGER.info("--> start str: #{str.inspect}")
+      new(tokenize(str)).read_form.tap do |_|
+        MAL_LOGGER.info("--> end\n")
+      end
     end
 
   private
@@ -40,7 +37,7 @@ class Reader
         p += m.to_s.length
       end
 
-      logger.info("--> tokens: #{tokens.join(' ')}")
+      MAL_LOGGER.info("#tokenize: #{tokens.map(&:inspect).join(' ')}")
       tokens
     end
   end
@@ -98,9 +95,7 @@ private
     elsif t =~ /^[\+\-\*\/]+$/
       MalSymbol.new(t)
     else
-      self.class.logger.error("--> #read_atom: Don't know how to handle token: #{t.inspect}")
-      # puts "skip: #{t}"
-      # skip for now
+      MAL_LOGGER.error("#read_atom: Don't know how to handle token: #{t.inspect}")
     end
   end
 end
