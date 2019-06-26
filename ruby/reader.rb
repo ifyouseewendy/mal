@@ -46,8 +46,12 @@ class Reader
 
   def read_form
     case _peek
-    when "(", "["
+    when "("
       read_list
+    when "["
+      read_vector
+    when "{"
+      read_hash
     else
       read_atom
     end
@@ -70,7 +74,7 @@ private
       _next
       t = _peek
 
-      break if t == ")" || t == "]"
+      break if t == ")"
 
       res << read_form
     end
@@ -78,21 +82,76 @@ private
     MalList.new(res)
   end
 
+  def read_vector
+    res = []
+    loop do
+      _next
+      t = _peek
+
+      break if t == "]"
+
+      res << read_form
+    end
+
+    MalVector.new(res)
+  end
+
+  def read_hash
+    res = []
+    loop do
+      _next
+      t = _peek
+
+      break if t == "}"
+
+      res << read_form
+    end
+
+    MalHash.new(res)
+  end
+
   def read_atom
     t = _peek
+
+    # MAL_LOGGER.info("--> #{t.inspect}")
+    unbalanced_check!(t)
+
     case t
     when "nil"
       MalNil.new(t)
     when "true", "false"
       MalBool.new(t)
+    when "'"
+      _next
+      MalList.new([MalString.new("quote"), read_form])
+    when "`"
+      _next
+      MalList.new([MalString.new("quasiquote"), read_form])
+    when "~"
+      _next
+      MalList.new([MalString.new("unquote"), read_form])
+    when "@"
+      _next
+      MalList.new([MalString.new("deref"), read_form])
+    when "~@"
+      _next
+      MalList.new([MalString.new("splice-unquote"), read_form])
+    when "^"
+      _next
+      meta = read_form
+      _next
+      list = read_form
+      MalList.new([MalString.new("with-meta"), list, meta])
+    when /^;/
+      MalNil.new(t)
+    when /^:/
+      MalKeyword.new(t)
     when /^[\-]?\d+$/
       MalNum.new(t.to_i)
     when /^".*"$/
       # v = t.gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'})
       # MAL_LOGGER.info "v: #{v.inspect}"
       MalString.new(t)
-    when /^".*$/
-      raise "unbalanced quotes"
     when /^[-|>|\w]+$/
       MalSymbol.new(t)
     when /^[\+\-\*\/]+$/
@@ -100,5 +159,17 @@ private
     else
       MAL_LOGGER.error("#read_atom: Don't know how to handle token: #{t.inspect}")
     end
+  end
+
+  PAIRS = {
+    '(' => ')',
+    '"' => '"'
+  }
+
+  def unbalanced_check!(t)
+    left = t[0]
+    return unless PAIRS.keys.include?(left)
+
+    raise "unbalanced pairing" unless t[1..-1].index(PAIRS[left])
   end
 end

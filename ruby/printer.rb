@@ -6,6 +6,12 @@ class Printer
     when MalList
       content = mal_v.value.map { |v| pr_str v }.join(" ")
       "(" + content + ")"
+    when MalVector
+      content = mal_v.value.map { |v| pr_str v }.join(" ")
+      "[" + content + "]"
+    when MalHash
+      content = mal_v.value.map { |v| pr_str v }.join(" ")
+      "{" + content + "}"
     else
       mal_v.value
     end
