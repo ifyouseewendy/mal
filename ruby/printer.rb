@@ -12,8 +12,10 @@ class Printer
     when MalHash
       content = mal_v.value.map { |v| pr_str v }.join(" ")
       "{" + content + "}"
-    else
+    when MalType
       mal_v.value
+    else
+      mal_v
     end
   end
 end
